@@ -1,6 +1,15 @@
-import React, {useState} from 'react';
-import {View, StyleSheet, TextInput, Pressable, Text} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Text,
+  Alert,
+} from 'react-native';
 import {Voximplant} from 'react-native-voximplant';
+import {APP_NAME, ACC_NAME} from '../../Constants';
+import {useNavigation} from '@react-navigation/native';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -8,7 +17,33 @@ const LoginScreen = () => {
 
   const voximplant = Voximplant.getInstance();
 
-  const signIn = () => {};
+  useEffect(() => {
+    const connect = async () => {
+      const status = await voximplant.getClientState();
+      console.log(status);
+      if (status === Voximplant.ClientState.DISCONNECTED) {
+        await voximplant.connect();
+      } else if (status === Voximplant.ClientState.LOGGED_IN) {
+        redirectHome();
+      }
+    };
+
+    connect();
+  }, []);
+
+  const signIn = async () => {
+    try {
+      const fqUsername = `${username}@${APP_NAME}.${ACC_NAME}.voximplant.com`;
+      await voximplant.login(fqUsername, password);
+    } catch (e) {
+      console.log(e);
+      Alert.alert(e.name, `Errpr code: ${e.code}`);
+    }
+  };
+
+  const redirectHome = () => {
+    navigation.navigate('Contacts');
+  };
 
   return (
     <View style={styles.page}>
