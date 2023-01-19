@@ -1,15 +1,18 @@
-#VideoCall
+# VideoCall
 
-####安装依赖
+#### 安装依赖
 `$ npm install`
 
-####启动服务
+#### mac系统需要额外运行
+`$ npx pod-install ios`
+
+#### 启动服务
 `$ npm start`
 
-####ios
+#### ios
 `$ npm run ios`
 
-####andriod
+#### android
 `$ npm run android`
 
 
