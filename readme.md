@@ -9,7 +9,7 @@
 #### ios
 `$ npm run ios`
 
-#### andriod
+#### android
 `$ npm run android`
 
 
