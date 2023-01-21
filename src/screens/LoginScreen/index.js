@@ -16,6 +16,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
 
   const voximplant = Voximplant.getInstance();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const connect = async () => {
@@ -23,8 +24,6 @@ const LoginScreen = () => {
       console.log(status);
       if (status === Voximplant.ClientState.DISCONNECTED) {
         await voximplant.connect();
-      } else if (status === Voximplant.ClientState.LOGGED_IN) {
-        redirectHome();
       }
     };
 
@@ -35,6 +34,8 @@ const LoginScreen = () => {
     try {
       const fqUsername = `${username}@${APP_NAME}.${ACC_NAME}.voximplant.com`;
       await voximplant.login(fqUsername, password);
+
+      redirectHome();
     } catch (e) {
       console.log(e);
       Alert.alert(e.name, `Errpr code: ${e.code}`);
@@ -42,7 +43,14 @@ const LoginScreen = () => {
   };
 
   const redirectHome = () => {
-    navigation.navigate('Contacts');
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'Contacts',
+        },
+      ],
+    });
   };
 
   return (
