@@ -24,6 +24,8 @@ const LoginScreen = () => {
       console.log(status);
       if (status === Voximplant.ClientState.DISCONNECTED) {
         await voximplant.connect();
+      } else if (status === Voximplant.ClientState.LOGGED_IN) {
+        redirectHome();
       }
     };
 
