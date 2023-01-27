@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import CallActionBox from '../../components/CallActionBox';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {Voximplant} from 'react-native-voximplant';
 
 const permissions = [
   PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
@@ -19,10 +20,16 @@ const permissions = [
 
 const CallingScreen = () => {
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [callStatus, setCallStatus] = useState('Initializing...');
+
   const navigation = useNavigation();
   const route = useRoute();
 
   const user = route?.params?.user;
+
+  const voximplant = Voximplant.getInstance();
+
+  const call = useRef();
 
   const goBack = () => {
     navigation.pop();
@@ -49,6 +56,62 @@ const CallingScreen = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!permissionGranted) {
+      return;
+    }
+
+    const callSettings = {
+      video: {
+        sendVideo: true,
+        receiveVideo: true,
+      },
+    };
+
+    const makeCall = async () => {
+      call.current = await voximplant.call(user.user_name, callSettings);
+      console.log(call);
+      subscribeToCallEvents();
+    };
+
+    const subscribeToCallEvents = () => {
+      call.current.on(Voximplant.CallEvents.Failed, callEvent => {
+        showError(callEvent.reason);
+      });
+
+      call.current.on(Voximplant.CallEvents.ProgressToneStart, callEvent => {
+        setCallStatus('Calling...');
+      });
+      call.current.on(Voximplant.CallEvents.Connected, callEvent => {
+        setCallStatus('Connected');
+      });
+      call.current.on(Voximplant.CallEvents.Disconnected, callEvent => {
+        navigation.navigate('Contacts');
+      });
+    };
+
+    const showError = reason => {
+      Alert.alert('Call Failed', `Reason: ${reason}`, [
+        {
+          text: 'OK',
+          onPress: navigation.navigate('Contacts'),
+        },
+      ]);
+    };
+
+    makeCall();
+    return () => {
+      call.current.off(Voximplant.CallEvents.Failed);
+      call.current.off(Voximplant.CallEvents.ProgressToneStart);
+      call.current.off(Voximplant.CallEvents.Connected);
+      call.current.off(Voximplant.CallEvents.Disconnected);
+    };
+  }, [permissionGranted]);
+
+  const onHangupPress = () => {
+    call.current.hangup();
+  };
+
   return (
     <View style={styles.page}>
       <Pressable onPress={goBack} style={styles.backButton}>
@@ -57,10 +120,10 @@ const CallingScreen = () => {
 
       <View style={styles.cameraPreview}>
         <Text style={styles.name}>{user?.user_display_name}</Text>
-        <Text style={styles.phoneNumber}>ringing +31 343 3232 5656</Text>
+        <Text style={styles.phoneNumber}>{callStatus}</Text>
       </View>
 
-      <CallActionBox />
+      <CallActionBox onHangupPress={onHangupPress} />
     </View>
   );
 };

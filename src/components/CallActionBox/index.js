@@ -3,7 +3,7 @@ import {View, StyleSheet, Pressable} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const CallActionBox = () => {
+const CallActionBox = onHangupPress => {
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const onReverseCamera = () => {};
@@ -13,7 +13,7 @@ const CallActionBox = () => {
   const onToggleMicrophone = () => {
     setIsMicOn(currentValue => !currentValue);
   };
-  const onHangup = () => {};
+
 
   return (
     <View style={styles.bottonsContainer}>
@@ -35,7 +35,7 @@ const CallActionBox = () => {
         />
       </Pressable>
       <Pressable
-        onPress={onHangup}
+        onPress={onHangupPress}
         style={[styles.iconButton, {backgroundColor: 'red'}]}>
         <MaterialIcons name="phone-hangup" size={30} color={'white'} />
       </Pressable>
