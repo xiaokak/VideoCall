@@ -1,19 +1,29 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  Pressable,
-  Alert,
-} from 'react-native';
+import React, {useEffect} from 'react';
+import {View, Text, StyleSheet, ImageBackground, Pressable} from 'react-native';
 import bg from '../../../assets/images/ios_bg.png';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useRoute, useNavigation} from '@react-navigation/native';
+import {Voximplant} from 'react-native-voximplant';
 
 const IncomingCallScreen = () => {
+  const [caller, setCaller] = useState(null);
+  const route = useRoute();
+  const navigation = useNavigation();
+  const {call} = route.params;
+
+  useEffect(() => {
+    call.on(Voximplant.CallEvents.Disconnected, callEvent => {
+      navigation.navigate('Contacts');
+    });
+
+    return () => {
+      call.off(Voximplant.CallEvents.Disconnected);
+    };
+  }, []);
+
   const onDecline = () => {
-    Alert.alert('titkle', 'decline');
+    call.decline();
   };
   const onAccept = () => {};
 
