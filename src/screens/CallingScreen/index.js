@@ -25,11 +25,11 @@ const CallingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const user = route?.params?.user;
+  const {user, call: incomingCall, isIncomingCall} = route?.params;
 
   const voximplant = Voximplant.getInstance();
 
-  const call = useRef();
+  const call = useRef(incomingCall);
 
   const goBack = () => {
     navigation.pop();
@@ -74,6 +74,8 @@ const CallingScreen = () => {
       subscribeToCallEvents();
     };
 
+    const answerCall = async () => {};
+
     const subscribeToCallEvents = () => {
       call.current.on(Voximplant.CallEvents.Failed, callEvent => {
         showError(callEvent.reason);
@@ -99,7 +101,12 @@ const CallingScreen = () => {
       ]);
     };
 
-    makeCall();
+    if (isIncomingCall) {
+      answerCall();
+    } else {
+      makeCall();
+    }
+
     return () => {
       call.current.off(Voximplant.CallEvents.Failed);
       call.current.off(Voximplant.CallEvents.ProgressToneStart);
